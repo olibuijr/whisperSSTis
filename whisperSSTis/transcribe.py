@@ -4,6 +4,7 @@ import logging
 import math
 from datetime import timedelta
 import re
+import numpy as np
 
 
 def load_model():
@@ -111,4 +112,4 @@ def create_srt(transcriptions):
                 text,
                 ""
             ])
-    return "\n".join(srt_lines) 
+    return "\n".join(srt_lines)

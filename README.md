@@ -4,23 +4,35 @@ Real-time Icelandic Speech Recognition powered by Whisper AI
 
 ## 🌟 Overview
 
-WhisperSST.is is a web application that provides real-time Icelandic speech recognition using a fine-tuned version of OpenAI's Whisper model. This tool allows users to record their voice and receive instant, accurate Icelandic transcriptions.
+WhisperSST.is is a 100% local web application that provides real-time Icelandic speech recognition using a fine-tuned version of OpenAI's Whisper model. This tool runs entirely on your machine - no cloud services or internet connection required for processing (only needed for initial model download). Your audio data never leaves your computer, ensuring complete privacy and security.
 
 ## ✨ Features
 
-- 🎤 Real-time audio recording
-- 🚀 Fast transcription processing
+- 🎤 Real-time audio recording and transcription
+- 🔒 100% local processing - no cloud or internet needed
+- 🚀 Fast, efficient transcription
 - 🔊 Instant audio playback
 - 📱 User-friendly interface
 - 🇮🇸 Specialized for Icelandic language
+- 💻 Runs on your hardware (CPU/GPU)
+- 📝 Timestamped transcriptions
+- 💾 Export to TXT and SRT formats
 
 ## 🛠️ Setup Instructions
 
 ### Prerequisites
 - Python 3.8+
-- CUDA-capable GPU (recommended)
+- CUDA-capable GPU (recommended, but CPU works too)
 - Microphone access
-- Internet connection (for model download)
+- Internet connection (only for initial model download)
+- ~4GB disk space for models
+
+### Privacy & Security
+- 🔒 100% local processing - your audio never leaves your computer
+- 🚫 No cloud services or API calls
+- 💻 All transcription happens on your machine
+- 🔐 No internet needed after model download
+- 🎯 No external dependencies for core functionality
 
 ### System Dependencies
 
@@ -77,10 +89,11 @@ http://localhost:8501
 
 ## 💻 Technical Details
 
-- **Frontend**: Streamlit
-- **Speech Recognition**: Fine-tuned Whisper model
+- **Frontend**: Streamlit (local web interface)
+- **Speech Recognition**: Fine-tuned Whisper model (runs locally)
 - **Audio Processing**: PortAudio, PyAudio
 - **ML Framework**: PyTorch, Transformers
+- **Privacy**: All processing done locally on your machine
 
 ## 👥 Credits
 

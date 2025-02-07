@@ -17,9 +17,18 @@ st.set_page_config(
 with st.sidebar:
     st.image("https://upload.wikimedia.org/wikipedia/commons/c/ce/Whisper_%28software%29_logo.svg", width=100)
     st.title("WhisperSST.is")
+    st.caption("🧪 Alpha Version")
     st.markdown("---")
-    st.subheader("ℹ️ About")
+    st.subheader("i️ About")
     st.markdown("WhisperSST.is provides real-time Icelandic speech recognition using OpenAI's Whisper model, fine-tuned for Icelandic.")
+    st.markdown("Developed by **Magnus Smari Smarason**")
+    st.markdown("---")
+    st.subheader("🏆 Credits")
+    st.markdown("""
+    - **Original Whisper Model**: [OpenAI](https://github.com/openai/whisper)
+    - **Icelandic Fine-tuned Model**: [Carlos Daniel Hernandez Mena](https://huggingface.co/carlosdanielhernandezmena/whisper-large-icelandic-10k-steps-1000h)
+    - Built with [Streamlit](https://streamlit.io/), [PyTorch](https://pytorch.org/), and [Hugging Face](https://huggingface.co/)
+    """)
     st.markdown("---")
     st.subheader("🔧 System Info")
     device_status = "🖥️ GPU (CUDA)" if torch.cuda.is_available() else "💻 CPU"
@@ -27,7 +36,8 @@ with st.sidebar:
     if torch.cuda.is_available():
         st.success(f"GPU: {torch.cuda.get_device_name(0)}")
 
-st.title("Icelandic Speech Recognition")
+st.title("Icelandic Speech Recognition 🎙️")
+st.caption("Powered by fine-tuned Whisper AI for the Icelandic language")
 
 # Initialize session state
 if 'model' not in st.session_state:
@@ -124,13 +134,11 @@ with tab2:
                         col.metric(key, value)
                     
                     st.markdown("##### ⚙️ Processing Options")
-                    opt_col1, opt_col2 = st.columns(2)
-                    with opt_col1:
-                        chunk_size = st.slider("Segment Length", min_value=10, max_value=60, value=30, help="Length of each transcribed segment")
-                    with opt_col2:
-                        overlap = st.slider("Segment Overlap", min_value=0, max_value=min(10, chunk_size-1), value=2, help="Overlap between segments for better context")
+                    chunk_size = st.slider("Segment Length", min_value=10, max_value=60, value=30, 
+                                         help="Length of each transcribed segment. Shorter segments may improve accuracy but take longer to process.")
                     
-                    num_segments = math.ceil(duration / (chunk_size - overlap)) if (chunk_size - overlap) else 1
+                    # Calculate number of segments
+                    num_segments = math.ceil(duration / chunk_size)
                     est_processing_time = num_segments * 2  # Rough estimate in seconds
                     
                     st.info(f"""
@@ -142,7 +150,13 @@ with tab2:
                     
                     if st.button("🚀 Start Processing", use_container_width=True):
                         with st.spinner("🤖 Processing your audio..."):
-                            transcriptions = transcribe.transcribe_long_audio(audio_data, st.session_state['model'], st.session_state['processor'], duration, chunk_size)
+                            transcriptions = transcribe.transcribe_long_audio(
+                                audio_data,
+                                st.session_state['model'],
+                                st.session_state['processor'],
+                                duration,
+                                chunk_size
+                            )
                         
                         st.markdown("##### 💾 Download Options")
                         dl_col1, dl_col2 = st.columns(2)
@@ -175,7 +189,12 @@ with tab2:
         """)
 
 with tab3:
-    st.markdown("### Live Transcription")
+    st.markdown("""
+    <div class="upload-header">
+    <h3>💬 Live Transcription</h3>
+    <p>Real-time speech-to-text conversion as you speak.</p>
+    </div>
+    """, unsafe_allow_html=True)
     live_devices = audio.get_audio_devices()
     if not live_devices:
         st.error("❌ No input devices available for live transcription.")
@@ -187,45 +206,110 @@ with tab3:
         live_chunk_length = st.slider("Chunk Length (seconds)", 
                                       min_value=1, max_value=10, value=3, key="live_chunk")
         
-        # Initialize live transcription session state variables
-        if "live_running" not in st.session_state:
-            st.session_state.live_running = False
-        if "live_transcript" not in st.session_state:
-            st.session_state.live_transcript = ""
-        
-        # Display a textbox to show the live transcript
-        transcript_box = st.text_area("Live Transcript", st.session_state.live_transcript, height=300, key="live_transcript_box")
-        
-        # Button to start live transcription
-        if st.button("Start Live Transcription", key="start_live"):
-            st.session_state.live_running = True
-            st.session_state.live_transcript = ""
-        
-        # Button to stop live transcription
-        if st.session_state.live_running and st.button("Stop Live Transcription", key="stop_live"):
-            st.session_state.live_running = False
-        
-        if st.session_state.live_running:
-            try:
-                # Record a chunk of audio (this blocks for 'live_chunk_length' seconds)
-                chunk_audio = audio.record_audio(live_chunk_length, live_device_id)
-                chunk_transcript = transcribe.transcribe_audio(chunk_audio,
-                                                               st.session_state['model'],
-                                                               st.session_state['processor'])
-                st.session_state.live_transcript += " " + chunk_transcript
-            except Exception as e:
-                st.error(f"❌ Error during live transcription: {str(e)}")
-            st.rerun()
+        # Initialize session state variables for live transcription
+        for key in ['live_running', 'live_transcript', 'audio_stream', 'processing', 'error_count']:
+            if key not in st.session_state:
+                st.session_state[key] = False if key in ['live_running', 'processing'] else "" if key == 'live_transcript' else None if key == 'audio_stream' else 0
 
+        # Create columns for controls and status
+        col1, col2, col3 = st.columns([1,1,2])
+        
+        with col1:
+            if not st.session_state.live_running:
+                if st.button("🎙️ Start", key="start_live", use_container_width=True):
+                    st.session_state.live_running = True
+                    st.session_state.live_transcript = ""
+                    st.session_state.error_count = 0
+                    # Initialize audio stream
+                    st.session_state.audio_stream = audio.AudioStream(
+                        device_id=live_device_id,
+                        samplerate=16000,
+                        chunk_size=int(live_chunk_length * 16000)
+                    )
+                    st.session_state.audio_stream.start_stream()
+        
+        with col2:
+            if st.session_state.live_running:
+                if st.button("⏹️ Stop", key="stop_live", use_container_width=True):
+                    if st.session_state.audio_stream:
+                        st.session_state.audio_stream.stop_stream()
+                    st.session_state.live_running = False
+                    st.session_state.audio_stream = None
+
+        with col3:
+            if st.session_state.live_running and st.session_state.audio_stream:
+                # Get and display audio level
+                level = st.session_state.audio_stream.get_audio_level()
+                level_normalized = min(1.0, level * 5)  # Scale for better visualization
+                level_bars = int(level_normalized * 20)
+                level_display = "▮" * level_bars + "▯" * (20 - level_bars)
+                st.markdown(f"🔴 Recording... Level: {level_display}")
+            elif st.session_state.processing:
+                st.markdown("⏳ Processing...")
+
+        # Display transcription area with improved styling
+        st.markdown("##### 📝 Live Transcript")
+        transcript_container = st.container()
+        with transcript_container:
+            st.markdown(
+                f'<div class="live-transcript">{st.session_state.live_transcript}</div>',
+                unsafe_allow_html=True
+            )
+
+        # Live transcription logic
+        if st.session_state.live_running and st.session_state.audio_stream:
+            try:
+                # Get audio chunk from stream
+                chunk = st.session_state.audio_stream.get_audio_chunk()
+                if chunk is not None and len(chunk) > 0:
+                    st.session_state.processing = True
+                    # Process the chunk
+                    chunk_transcript = transcribe.transcribe_audio(
+                        chunk,
+                        st.session_state['model'],
+                        st.session_state['processor']
+                    )
+                    if chunk_transcript.strip():
+                        st.session_state.live_transcript += " " + chunk_transcript
+                    st.session_state.processing = False
+                    st.session_state.error_count = 0
+                
+            except Exception as e:
+                st.session_state.error_count += 1
+                if st.session_state.error_count > 3:
+                    st.error("❌ Multiple errors occurred. Stopping live transcription.")
+                    if st.session_state.audio_stream:
+                        st.session_state.audio_stream.stop_stream()
+                    st.session_state.live_running = False
+                    st.session_state.audio_stream = None
+                else:
+                    st.warning(f"⚠️ Error during live transcription: {str(e)}")
+            finally:
+                st.rerun()
+
+# Add custom styles
 st.markdown("""
     <style>
+    .live-transcript {
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        background-color: #f8f9fa;
+        margin: 1rem 0;
+        border-left: 4px solid #28a745;
+        min-height: 200px;
+        max-height: 400px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        font-size: 1.1em;
+        line-height: 1.6;
+    }
     .main > div {
         padding-top: 2rem;
     }
-    .stTabs [data-baseweb=\"tab-list\"] {
+    .stTabs [data-baseweb="tab-list"] {
         gap: 2rem;
     }
-    .stTabs [data-baseweb=\"tab\"] {
+    .stTabs [data-baseweb="tab"] {
         height: 3rem;
     }
     .stButton > button {
@@ -235,9 +319,29 @@ st.markdown("""
         margin-bottom: 2rem;
     }
     .file-info {
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 0.5rem;
         background-color: #f0f2f6;
+        margin: 1rem 0;
+        border-left: 4px solid #1f77b4;
+    }
+    .stAlert {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    .css-1dp5vir {
+        background-color: #ffffff;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .css-1dp5vir:hover {
+        box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+        transition: all 0.2s ease;
     }
     </style>
-""", unsafe_allow_html=True) 
+""", unsafe_allow_html=True)
