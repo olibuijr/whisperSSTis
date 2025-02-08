@@ -8,7 +8,7 @@ from whisperSSTis import audio, transcribe
 
 # Set page config and theme
 st.set_page_config(
-    page_title="WhisperSST.is - Icelandic Speech Recognition",
+    page_title="Norðlenski hreimurinn - Icelandic Speech Recognition",
     page_icon="🎙️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -35,11 +35,11 @@ st.markdown("""
 # Sidebar
 with st.sidebar:
     st.image("assets/websitelogo.png", width=200)
-    st.title("WhisperSST.is")
+    st.title("Norðlenski hreimurinn")
     st.caption("🧪 Alpha Version")
     st.markdown("---")
     st.subheader("🧪 About")
-    st.markdown("WhisperSST.is provides real-time Icelandic speech recognition using OpenAI's Whisper model, fine-tuned for Icelandic.")
+    st.markdown("Norðlenski hreimurinn provides real-time Icelandic speech recognition using OpenAI's Whisper model, fine-tuned for Icelandic.")
     st.markdown("Developed by [**Magnus Smari Smarason**](https://www.smarason.is)")
     st.markdown("---")
     st.subheader("🏆 Credits")

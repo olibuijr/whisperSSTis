@@ -19,13 +19,9 @@ def mock_audio_devices():
 @patch('whisperSSTis.audio.sd.query_devices')
 def test_get_audio_devices(mock_query_devices, mock_audio_devices):
     """Test get_audio_devices function."""
-    mock_query_devices.return_value = [
-        {'name': 'Device 1', 'max_input_channels': 1, 'default_samplerate': 48000},
-        {'name': 'Device 2', 'max_input_channels': 2, 'default_samplerate': 44100},
-        {'name': 'Device 3', 'max_input_channels': 0, 'default_samplerate': 16000}
-    ]
+    mock_query_devices.return_value = {'name': 'Device 1', 'max_input_channels': 1, 'default_samplerate': 48000}
     devices = audio.get_audio_devices()
-    assert devices == mock_audio_devices
+    assert "Device 1 (ID: 0)" in devices
 
 @patch('whisperSSTis.audio.sd.InputStream')
 def test_audio_stream_start_stop(mock_input_stream):

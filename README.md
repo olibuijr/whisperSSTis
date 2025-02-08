@@ -1,10 +1,12 @@
-# 🎙️ WhisperSST.is
+# 🎙️ Norðlenski hreimurinn
 
 Real-time Icelandic Speech Recognition powered by Whisper AI
 
 ## 🌟 Overview
 
 WhisperSST.is is a 100% local web application that provides real-time Icelandic speech recognition using a fine-tuned version of OpenAI's Whisper model. This tool runs entirely on your machine - no cloud services or internet connection required for processing (only needed for initial model download). Your audio data never leaves your computer, ensuring complete privacy and security.
+
+**Note:** This application is currently in development, so bugs are expected.
 
 ## ✨ Features
 
@@ -31,6 +33,7 @@ WhisperSST.is is a 100% local web application that provides real-time Icelandic 
 - 📄 Export to more formats (DOCX, PDF)
 - 🇮🇸 Icelandic translation of the user interface
 - 🎵 Add sample audio files for testing and demonstration
+- 🧪 Added test audio file located at `tests/demo/test_vedur.mp3`
 
 ## 🛠️ Setup Instructions
 
@@ -205,7 +208,38 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Magnussmari/whisperSSTis/issues).
 
----
+## 🔒 Security Considerations
+
+### External Model
+The application relies on a pre-trained model from Hugging Face. While Hugging Face is generally reputable, there's always a risk with using third-party models.
+
+### FFmpeg
+The use of `ffmpeg-python` and `pydub` introduces a dependency on FFmpeg, which is a complex library with a history of vulnerabilities.
+
+### `unsafe_allow_html=True`
+Although used only for styling in `app.py`, this flag could be a vulnerability if user input is ever incorporated into the HTML without sanitization.
+
+### Library Versions
+It is unknown if the libraries are using a vulnerable version.
+
+**Note:** When in doubt, use the application offline to minimize security risks.
+
+## 🔧 Recommendations
+
+### Monitor for Vulnerabilities
+Regularly check for vulnerabilities in the listed dependencies, especially `ffmpeg-python`, `pydub`, `transformers`, and `streamlit`. Update to newer versions if vulnerabilities are found.
+
+### Consider Model Verification
+If possible, implement a mechanism to verify the integrity of the downloaded model (e.g., by checking its hash) before loading it.
+
+### Review `unsafe_allow_html` Usage
+Ensure that `unsafe_allow_html=True` is only used for trusted content (like static styles) and never for user-provided data. If user data needs to be displayed, use proper sanitization techniques.
+
+### Input Validation
+Although the app is local, it's good practice to validate user inputs. For example, check the file type and size of uploaded audio files.
+
+### Error Handling
+Ensure that temporary files are always deleted, even in case of errors. The current code seems to handle this correctly, but it's worth double-checking.
 <p align="center">
 Developed with ❤️ for the Icelandic language community
 </p>
