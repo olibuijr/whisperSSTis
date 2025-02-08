@@ -25,6 +25,7 @@
 - [ ] Test with different microphones
 - [ ] Test with various audio file formats
 - [ ] Add more comprehensive tests for core functions
+- [ ] Add tests for m4a conversion
 
 ## Distribution
 - [ ] Set up automatic builds
@@ -34,6 +35,7 @@
 
 ## Future Improvements
 - [ ] Add support for more languages
+- [x] Implement M4A support
 - [ ] Implement batch processing
 - [ ] Add export options (more formats)
 - [ ] Create desktop integration (file associations, context menus)

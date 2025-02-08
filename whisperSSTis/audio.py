@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 import logging
+from pydub import AudioSegment
 
 
 def get_audio_devices() -> dict:
@@ -162,12 +163,25 @@ def get_file_info(audio_data, sample_rate: int):
 
 def load_audio_file(uploaded_file, target_sr: int = 16000):
     """
-    Load and preprocess an uploaded audio file.
+    Load and preprocess an uploaded audio file, handling m4a conversion.
     """
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=Path(uploaded_file.name).suffix) as tmp_file:
+        file_suffix = Path(uploaded_file.name).suffix.lower()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_suffix) as tmp_file:
             tmp_file.write(uploaded_file.getvalue())
             tmp_path = tmp_file.name
+        
+        # Convert m4a to wav if necessary
+        if file_suffix == ".m4a":
+            try:
+                audio = AudioSegment.from_file(tmp_path, format="m4a")
+                wav_path = tmp_path + ".wav"
+                audio.export(wav_path, format="wav")
+                tmp_path = wav_path
+            except Exception as e:
+                logging.error(f"Error converting m4a to wav: {str(e)}")
+                raise
+        
         audio_data, sr = sf.read(tmp_path)
         if len(audio_data.shape) > 1:
             audio_data = audio_data.mean(axis=1)
@@ -176,6 +190,8 @@ def load_audio_file(uploaded_file, target_sr: int = 16000):
             from scipy import signal
             audio_data = signal.resample(audio_data, int(len(audio_data) * target_sr / sr))
         os.unlink(tmp_path)
+        if file_suffix == ".m4a":
+            os.unlink(tmp_path[:-4]) # remove .m4a
         duration = len(audio_data) / target_sr
         return audio_data, duration, file_info
     except Exception as e:

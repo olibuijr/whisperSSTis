@@ -98,6 +98,34 @@ def test_load_audio_file(mocker):
     assert duration == 1.0
     assert isinstance(file_info, dict)
 
+def test_load_m4a_file(mocker):
+    """Test load_audio_file function with m4a file."""
+    # Mock the uploaded file
+    class MockUploadedFile:
+        def __init__(self, name, content):
+            self.name = name
+            self.content = content
+        def getvalue(self):
+            return self.content
+
+    # Create a mock m4a file
+    mock_audio_content = b"Mock m4a audio data"
+    mock_uploaded_file = MockUploadedFile("test.m4a", mock_audio_content)
+
+    # Mock AudioSegment and sf.read
+    mock_audio_segment = mocker.MagicMock()
+    mocker.patch("whisperSSTis.audio.AudioSegment.from_file", return_value=mock_audio_segment)
+    mocker.patch("whisperSSTis.audio.sf.read", return_value=(np.zeros(16000), 16000))
+    mocker.patch("whisperSSTis.audio.os.unlink")
+
+    # Call the function
+    audio_data, duration, file_info = audio.load_audio_file(mock_uploaded_file)
+
+    # Assertions
+    assert isinstance(audio_data, np.ndarray)
+    assert duration == 1.0
+    assert isinstance(file_info, dict)
+
 def test_load_audio_file_exception(mocker):
     """Test load_audio_file function with exception."""
     # Mock the uploaded file

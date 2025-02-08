@@ -17,6 +17,7 @@ WhisperSST.is is a 100% local web application that provides real-time Icelandic 
 - 💻 Runs on your hardware (CPU/GPU)
 - 📝 Timestamped transcriptions
 - 💾 Export to TXT and SRT formats
+- 🎵 Supports M4A audio files
 
 ## 🛠️ Setup Instructions
 

@@ -119,7 +119,7 @@ with tab2:
     
     with upload_col1:
         st.markdown("##### 📁 Upload Your File")
-        uploaded_file = st.file_uploader("Choose an audio file", type=['wav', 'mp3', 'm4a', 'flac'], help="Supported formats: WAV, MP3, M4A, FLAC")
+        uploaded_file = st.file_uploader("Choose an audio file", type=['wav', 'mp3', 'm4a', 'flac'], help="Supported formats: WAV, MP3, M4A, FLAC, M4A")
         
         if uploaded_file is not None:
             st.audio(uploaded_file)

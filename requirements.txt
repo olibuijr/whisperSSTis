@@ -9,3 +9,4 @@ ffmpeg-python
 pytest
 pytest-mock
 pyinstaller
+pydub
