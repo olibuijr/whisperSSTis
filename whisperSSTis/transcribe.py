@@ -36,13 +36,16 @@ def transcribe_audio(audio_data, model, processor, sample_rate: int = 16000):
         ).input_features.to(device)
 
         attention_mask = torch.ones_like(input_features)
+        
+        # Generate without forcing language tokens
         with torch.no_grad():
             predicted_ids = model.generate(
                 input_features,
-                language="is",
+                attention_mask=attention_mask,
                 task="transcribe",
-                attention_mask=attention_mask
+                language="<|is|>"  # Use language tag instead of forced decoder ids
             )[0]
+            
         transcription = processor.decode(predicted_ids, skip_special_tokens=True)
         return transcription
     except Exception as e:
@@ -81,9 +84,10 @@ def transcribe_long_audio(audio_data, model, processor, duration: float, chunk_s
             with torch.no_grad():
                 predicted_ids = model.generate(
                     input_features,
-                    language="is",
-                    task="transcribe"
+                    task="transcribe",
+                    language="<|is|>"  # Use language tag instead of forced decoder ids
                 )[0]
+                
             chunk_transcription = processor.decode(predicted_ids, skip_special_tokens=True)
             start_time = format_timestamp(i * chunk_size)
             end_time = format_timestamp(min((i + 1) * chunk_size, duration))
