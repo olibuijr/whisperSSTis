@@ -50,7 +50,26 @@ brew install portaudio
 #### Windows
 The required libraries are typically included with Python packages.
 
-### Installation Steps
+### Installation Options
+
+#### Option 1: Download Pre-built Package (Recommended for most users)
+
+1. Download the latest release for your platform from the [releases page](https://github.com/Magnussmari/whisperSSTis/releases)
+2. Extract the downloaded package
+3. Run the setup script for your platform:
+   - Windows: Double-click `setup_dependencies.bat`
+   - macOS/Linux: Open terminal and run `./setup_dependencies.sh`
+4. Double-click the WhisperSST executable
+5. Click "Start WhisperSST.is" in the launcher window
+6. The application will open in your default web browser
+
+The setup script will automatically:
+- Install required system dependencies
+- Set up the audio libraries
+- Configure your system for optimal performance
+- Check for any missing components
+
+#### Option 2: Manual Installation (For developers)
 
 1. Clone the repository:
 ```bash
@@ -69,23 +88,86 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Running the Application
-
-1. Start the Streamlit server:
+4. Start the application:
 ```bash
-streamlit run sst_is_test.py
+python launcher.py
 ```
 
-2. Open your web browser and navigate to:
+### Building from Source
+
+To create a standalone executable:
+
+1. Install build dependencies:
+```bash
+pip install -r requirements.txt
 ```
-http://localhost:8501
+
+2. Run the build script:
+```bash
+python build.py
 ```
+
+The build script will:
+- Download and cache the Whisper model
+- Package all dependencies
+- Create a standalone executable
+- Generate a distribution package
+
+The packaged application will be available in `dist/WhisperSST_package/`, containing:
+- WhisperSST executable
+- Pre-downloaded model
+- Documentation
+- Quick start guide
+
+#### Build Options
+
+The build process automatically handles:
+- Platform-specific dependencies
+- Audio framework integration
+- Model packaging
+- Resource bundling
+
+For custom builds, you can modify `build.py` to:
+- Change target platforms
+- Adjust packaging options
+- Modify included resources
+- Configure build settings
 
 ### Troubleshooting
 
-- **PortAudio Error**: Make sure you've installed the system dependencies
-- **CUDA Error**: Check your GPU drivers and PyTorch installation
-- **Microphone Error**: Ensure your microphone is properly connected and has necessary permissions
+#### Common Issues
+
+- **Application won't start**: 
+  - Run the setup script for your platform
+  - Make sure you have extracted all files from the downloaded package
+  - Try running as administrator
+  - Check your antivirus isn't blocking the application
+
+- **No audio input**: 
+  - Run the setup script to install audio dependencies
+  - Check your microphone is properly connected
+  - Allow microphone access in your system settings
+  - Select the correct input device in the application
+
+- **Slow transcription**:
+  - A GPU is recommended but not required
+  - First launch may be slow while loading the model
+  - Try adjusting chunk size for better performance
+  - Models are cached locally for faster subsequent runs
+
+- **PortAudio Error**: 
+  - Run `setup_dependencies.sh` (macOS/Linux) or `setup_dependencies.bat` (Windows)
+  - Windows: Install Visual C++ Redistributable if prompted
+  - Linux: Run `sudo apt-get install portaudio19-dev python3-pyaudio`
+  - macOS: Run `brew install portaudio`
+
+- **Missing Dependencies**:
+  - Run the setup script for your platform
+  - Check the error message for specific missing packages
+  - For Windows, ensure Visual C++ Redistributable is installed
+  - For Linux, install required system packages using your package manager
+
+For more help, check the [issues page](https://github.com/Magnussmari/whisperSSTis/issues) or create a new issue.
 
 ## 💻 Technical Details
 

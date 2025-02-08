@@ -6,3 +6,4 @@ sounddevice>=0.4.6
 soundfile
 scipy
 ffmpeg-python
+pyinstaller
