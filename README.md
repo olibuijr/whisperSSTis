@@ -8,7 +8,8 @@ WhisperSST.is is a 100% local web application that provides real-time Icelandic 
 
 ## ✨ Features
 
-- 🎤 Real-time audio recording and transcription
+- 🎤 Record and transcribe audio directly from your microphone
+- 📁 Upload and process audio files (WAV, MP3, M4A, FLAC)
 - 🔒 100% local processing - no cloud or internet needed
 - 🚀 Fast, efficient transcription
 - 🔊 Instant audio playback
@@ -17,7 +18,19 @@ WhisperSST.is is a 100% local web application that provides real-time Icelandic 
 - 💻 Runs on your hardware (CPU/GPU)
 - 📝 Timestamped transcriptions
 - 💾 Export to TXT and SRT formats
-- 🎵 Supports M4A audio files
+
+## 🚀 Future Development
+
+- 🎙️ Live transcription feature for real-time speech-to-text conversion
+- 📊 Support for more audio formats
+- 🧠 Improved accuracy through model fine-tuning
+- 📚 Batch processing for multiple files
+- 📖 Custom vocabulary support
+- 👥 Speaker diarization
+- ⏱️ Word-level timestamps
+- 📄 Export to more formats (DOCX, PDF)
+- 🇮🇸 Icelandic translation of the user interface
+- 🎵 Add sample audio files for testing and demonstration
 
 ## 🛠️ Setup Instructions
 

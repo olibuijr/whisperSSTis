@@ -6,6 +6,7 @@ import soundfile as sf
 
 from whisperSSTis import audio, transcribe
 
+# Set page config and theme
 st.set_page_config(
     page_title="WhisperSST.is - Icelandic Speech Recognition",
     page_icon="🎙️",
@@ -13,15 +14,33 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Force light mode
+st.markdown("""
+    <style>
+        [data-testid="stAppViewContainer"] {
+            background-color: #ffffff;
+        }
+        .stApp {
+            background-color: #ffffff;
+        }
+        [data-testid="stSidebar"] {
+            background-color: #f8f9fa;
+        }
+        [data-testid="stMarkdownContainer"] {
+            color: #000000;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Sidebar
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/c/ce/Whisper_%28software%29_logo.svg", width=100)
+    st.image("assets/websitelogo.png", width=200)
     st.title("WhisperSST.is")
     st.caption("🧪 Alpha Version")
     st.markdown("---")
-    st.subheader("i️ About")
+    st.subheader("🧪 About")
     st.markdown("WhisperSST.is provides real-time Icelandic speech recognition using OpenAI's Whisper model, fine-tuned for Icelandic.")
-    st.markdown("Developed by **Magnus Smari Smarason**")
+    st.markdown("Developed by [**Magnus Smari Smarason**](https://www.smarason.is)")
     st.markdown("---")
     st.subheader("🏆 Credits")
     st.markdown("""
@@ -47,6 +66,7 @@ if 'processor' not in st.session_state:
 if 'audio_data' not in st.session_state:
     st.session_state['audio_data'] = None
 
+# Load the model if not loaded
 if st.session_state['model'] is None:
     with st.spinner("🤖 Loading AI model... This might take a minute..."):
         model, processor = transcribe.load_model()
@@ -54,10 +74,15 @@ if st.session_state['model'] is None:
         st.session_state['processor'] = processor
     st.success("✅ Model loaded successfully!")
 
-# Create tabs for recording and uploading
-tab1, tab2, tab3 = st.tabs(["🎤 Record Audio", "📁 Upload Audio", "💬 Live Transcription"])
+# Create tabs
+tabs = ["🎤 Record Audio", "📁 Upload Audio"]
+current_tab = st.radio("Select Mode", tabs, horizontal=True, label_visibility="collapsed")
 
-with tab1:
+# Set the active tab based on selection
+active_tab = tabs.index(current_tab)
+
+# Handle tab content based on active tab
+if active_tab == 0:
     st.markdown("""
     <div class="upload-header">
     <h3>Record Your Voice</h3>
@@ -78,7 +103,7 @@ with tab1:
                 device_choice = st.selectbox("🎙️ Select Input Device", options=device_options)
                 selected_device_id = input_devices[device_choice]
                 rec_duration = st.slider("⏱️ Recording Duration (seconds)", min_value=1, max_value=30, value=5, help="Choose how long you want to record")
-                if st.button("🎙️ Start Recording", use_container_width=True):
+                if st.button("🎤 Start Recording", use_container_width=True):
                     try:
                         with st.spinner("🎤 Recording in progress..."):
                             audio_data = audio.record_audio(rec_duration, selected_device_id)
@@ -101,13 +126,13 @@ with tab1:
         st.info("""
         1. Select your microphone from the dropdown.
         2. Set your preferred recording duration.
-        3. Click \"Start Recording\" and speak in Icelandic.
+        3. Click "Start Recording" and speak in Icelandic.
         4. Wait for the transcription to appear.
         
         **Note:** Ensure your microphone is properly connected and permitted.
         """)
 
-with tab2:
+elif active_tab == 1:
     st.markdown("""
     <div class="upload-header">
     <h3>Upload Audio File</h3>
@@ -119,15 +144,37 @@ with tab2:
     
     with upload_col1:
         st.markdown("##### 📁 Upload Your File")
-        uploaded_file = st.file_uploader("Choose an audio file", type=['wav', 'mp3', 'm4a', 'flac'], help="Supported formats: WAV, MP3, M4A, FLAC, M4A")
+        # Add key to file uploader to maintain state
+        uploaded_file = st.file_uploader(
+            "Choose an audio file",
+            type=['wav', 'mp3', 'm4a', 'flac'],
+            help="Supported formats: WAV, MP3, M4A, FLAC",
+            key="file_uploader"
+        )
         
         if uploaded_file is not None:
+            # Store file info in session state
+            if 'uploaded_file_info' not in st.session_state:
+                st.session_state['uploaded_file_info'] = {
+                    'name': uploaded_file.name,
+                    'type': uploaded_file.type,
+                    'size': uploaded_file.size
+                }
+            
             st.audio(uploaded_file)
             
             try:
-                with st.spinner("📊 Analyzing file..."):
+                with st.spinner("🤖 Analyzing file..."):
                     audio_data, duration, file_info = audio.load_audio_file(uploaded_file)
                 if audio_data is not None and file_info is not None:
+                    # Store processing results in session state
+                    if 'processing_results' not in st.session_state:
+                        st.session_state['processing_results'] = {
+                            'audio_data': audio_data,
+                            'duration': duration,
+                            'file_info': file_info
+                        }
+                    
                     st.markdown("##### 📊 File Details")
                     detail_cols = st.columns(len(file_info))
                     for col, (key, value) in zip(detail_cols, file_info.items()):
@@ -188,105 +235,6 @@ with tab2:
         - You can adjust segment length for better accuracy.
         """)
 
-with tab3:
-    st.markdown("""
-    <div class="upload-header">
-    <h3>💬 Live Transcription</h3>
-    <p>Real-time speech-to-text conversion as you speak.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    live_devices = audio.get_audio_devices()
-    if not live_devices:
-        st.error("❌ No input devices available for live transcription.")
-    else:
-        live_device_choice = st.selectbox("🎙️ Select Input Device for Live Transcription",
-                                            options=list(live_devices.keys()),
-                                            key="live_device")
-        live_device_id = live_devices[live_device_choice]
-        live_chunk_length = st.slider("Chunk Length (seconds)", 
-                                      min_value=1, max_value=10, value=3, key="live_chunk")
-        
-        # Initialize session state variables for live transcription
-        for key in ['live_running', 'live_transcript', 'audio_stream', 'processing', 'error_count']:
-            if key not in st.session_state:
-                st.session_state[key] = False if key in ['live_running', 'processing'] else "" if key == 'live_transcript' else None if key == 'audio_stream' else 0
-
-        # Create columns for controls and status
-        col1, col2, col3 = st.columns([1,1,2])
-        
-        with col1:
-            if not st.session_state.live_running:
-                if st.button("🎙️ Start", key="start_live", use_container_width=True):
-                    st.session_state.live_running = True
-                    st.session_state.live_transcript = ""
-                    st.session_state.error_count = 0
-                    # Initialize audio stream
-                    st.session_state.audio_stream = audio.AudioStream(
-                        device_id=live_device_id,
-                        samplerate=16000,
-                        chunk_size=int(live_chunk_length * 16000)
-                    )
-                    st.session_state.audio_stream.start_stream()
-        
-        with col2:
-            if st.session_state.live_running:
-                if st.button("⏹️ Stop", key="stop_live", use_container_width=True):
-                    if st.session_state.audio_stream:
-                        st.session_state.audio_stream.stop_stream()
-                    st.session_state.live_running = False
-                    st.session_state.audio_stream = None
-
-        with col3:
-            if st.session_state.live_running and st.session_state.audio_stream:
-                # Get and display audio level
-                level = st.session_state.audio_stream.get_audio_level()
-                level_normalized = min(1.0, level * 5)  # Scale for better visualization
-                level_bars = int(level_normalized * 20)
-                level_display = "▮" * level_bars + "▯" * (20 - level_bars)
-                st.markdown(f"🔴 Recording... Level: {level_display}")
-            elif st.session_state.processing:
-                st.markdown("⏳ Processing...")
-
-        # Display transcription area with improved styling
-        st.markdown("##### 📝 Live Transcript")
-        transcript_container = st.container()
-        with transcript_container:
-            st.markdown(
-                f'<div class="live-transcript">{st.session_state.live_transcript}</div>',
-                unsafe_allow_html=True
-            )
-
-        # Live transcription logic
-        if st.session_state.live_running and st.session_state.audio_stream:
-            try:
-                # Get audio chunk from stream
-                chunk = st.session_state.audio_stream.get_audio_chunk()
-                if chunk is not None and len(chunk) > 0:
-                    st.session_state.processing = True
-                    # Process the chunk
-                    chunk_transcript = transcribe.transcribe_audio(
-                        chunk,
-                        st.session_state['model'],
-                        st.session_state['processor']
-                    )
-                    if chunk_transcript.strip():
-                        st.session_state.live_transcript += " " + chunk_transcript
-                    st.session_state.processing = False
-                    st.session_state.error_count = 0
-                
-            except Exception as e:
-                st.session_state.error_count += 1
-                if st.session_state.error_count > 3:
-                    st.error("❌ Multiple errors occurred. Stopping live transcription.")
-                    if st.session_state.audio_stream:
-                        st.session_state.audio_stream.stop_stream()
-                    st.session_state.live_running = False
-                    st.session_state.audio_stream = None
-                else:
-                    st.warning(f"⚠️ Error during live transcription: {str(e)}")
-            finally:
-                st.rerun()
-
 # Add custom styles
 st.markdown("""
     <style>
@@ -342,6 +290,54 @@ st.markdown("""
     .css-1dp5vir:hover {
         box-shadow: 0 3px 6px rgba(0,0,0,0.16);
         transition: all 0.2s ease;
+    }
+    /* Improve tab transitions */
+    .stTabs [data-baseweb="tab-list"] button {
+        transition: all 0.3s ease-in-out;
+    }
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+        border-bottom-color: rgb(255, 75, 75);
+    }
+    .stTabs [data-baseweb="tab-panel"] {
+        transition: opacity 0.3s ease-in-out;
+    }
+    /* Style radio buttons to look like tabs */
+    div.row-widget.stRadio > div {
+        flex-direction: row;
+        justify-content: center;
+        gap: 2rem;
+    }
+    
+    div.row-widget.stRadio > div[role="radiogroup"] > label {
+        padding: 0.5rem 1rem;
+        background: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 0;
+        transition: all 0.3s ease;
+    }
+    
+    div.row-widget.stRadio > div[role="radiogroup"] > label:hover {
+        background: rgba(255, 75, 75, 0.1);
+    }
+    
+    div.row-widget.stRadio > div[role="radiogroup"] label[data-baseweb="radio"] {
+        border-color: transparent;
+    }
+    
+    div.row-widget.stRadio > div[role="radiogroup"] > label > div {
+        background-color: transparent !important;
+        border-color: transparent !important;
+    }
+    
+    /* Hide the radio button circle */
+    div.row-widget.stRadio > div[role="radiogroup"] label[data-baseweb="radio"] > div:first-child {
+        display: none;
+    }
+    
+    /* Add bottom border for selected tab */
+    div.row-widget.stRadio > div[role="radiogroup"] label[data-baseweb="radio"][aria-checked="true"] {
+        border-bottom: 2px solid rgb(255, 75, 75);
     }
     </style>
 """, unsafe_allow_html=True)
