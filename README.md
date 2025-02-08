@@ -50,26 +50,7 @@ brew install portaudio
 #### Windows
 The required libraries are typically included with Python packages.
 
-### Installation Options
-
-#### Option 1: Download Pre-built Package (Recommended for most users)
-
-1. Download the latest release for your platform from the [releases page](https://github.com/Magnussmari/whisperSSTis/releases)
-2. Extract the downloaded package
-3. Run the setup script for your platform:
-   - Windows: Double-click `setup_dependencies.bat`
-   - macOS/Linux: Open terminal and run `./setup_dependencies.sh`
-4. Double-click the WhisperSST executable
-5. Click "Start WhisperSST.is" in the launcher window
-6. The application will open in your default web browser
-
-The setup script will automatically:
-- Install required system dependencies
-- Set up the audio libraries
-- Configure your system for optimal performance
-- Check for any missing components
-
-#### Option 2: Manual Installation (For developers)
+### Installation
 
 1. Clone the repository:
 ```bash
@@ -93,45 +74,45 @@ pip install -r requirements.txt
 python launcher.py
 ```
 
-### Building from Source
+### Development Setup
 
-To create a standalone executable:
+For developers who want to contribute or modify the application:
 
-1. Install build dependencies:
+1. Set up your development environment:
 ```bash
+# Clone the repository
+git clone https://github.com/Magnussmari/whisperSSTis.git
+cd whisperSSTis
+
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-2. Run the build script:
+2. Project Structure:
+- `app.py`: Main Streamlit application
+- `launcher.py`: GUI launcher for the application
+- `whisperSSTis/`: Core module containing audio and transcription logic
+- `setup_dependencies.sh/bat`: System dependency installation scripts
+- `TODO.md`: Current development tasks and future plans
+
+3. Running in Development Mode:
 ```bash
-python build.py
+# Run with launcher GUI
+python launcher.py
+
+# Run Streamlit directly
+streamlit run app.py
 ```
 
-The build script will:
-- Download and cache the Whisper model
-- Package all dependencies
-- Create a standalone executable
-- Generate a distribution package
-
-The packaged application will be available in `dist/WhisperSST_package/`, containing:
-- WhisperSST executable
-- Pre-downloaded model
-- Documentation
-- Quick start guide
-
-#### Build Options
-
-The build process automatically handles:
-- Platform-specific dependencies
-- Audio framework integration
-- Model packaging
-- Resource bundling
-
-For custom builds, you can modify `build.py` to:
-- Change target platforms
-- Adjust packaging options
-- Modify included resources
-- Configure build settings
+4. Development Guidelines:
+- Follow PEP 8 style guidelines
+- Add docstrings for new functions
+- Update TODO.md for new features/fixes
+- Test changes with different audio inputs
 
 ### Troubleshooting
 
