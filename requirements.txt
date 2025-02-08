@@ -10,3 +10,4 @@ pytest
 pytest-mock
 pyinstaller
 pydub
+psutil
