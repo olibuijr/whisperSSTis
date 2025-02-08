@@ -2,7 +2,7 @@ import torch
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 import logging
 import math
-from datetime import timedelta
+from datetime import timedelta, datetime
 import re
 import numpy as np
 
@@ -103,12 +103,16 @@ def create_srt(transcriptions):
     for i, trans in enumerate(transcriptions, start=1):
         timestamp_match = re.match(r'\[(.*?) → (.*?)\] (.*)', trans)
         if timestamp_match:
-            start_time, end_time, text = timestamp_match.groups()
-            start_time = start_time.replace(':', ',') + ',000'
-            end_time = end_time.replace(':', ',') + ',000'
+            start_time_str, end_time_str, text = timestamp_match.groups()
+            start_time = datetime.strptime(start_time_str, "%H:%M:%S")
+            end_time = datetime.strptime(end_time_str, "%H:%M:%S")
+
+            start_time_srt = start_time.strftime("%H:%M:%S,%f")[:-3]
+            end_time_srt = end_time.strftime("%H:%M:%S,%f")[:-3]
+
             srt_lines.extend([
                 str(i),
-                f"{start_time} --> {end_time}",
+                f"{start_time_srt} --> {end_time_srt}",
                 text,
                 ""
             ])
