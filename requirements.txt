@@ -1,13 +1,10 @@
-streamlit
 torch
 transformers
 numpy
 sounddevice>=0.4.6
 soundfile
 scipy
-ffmpeg-python
-pytest
-pytest-mock
-pyinstaller
-pydub
+librosa
 psutil
+yt-dlp
+pyttsx3
