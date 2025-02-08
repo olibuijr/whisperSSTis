@@ -114,6 +114,17 @@ streamlit run app.py
 - Update TODO.md for new features/fixes
 - Test changes with different audio inputs
 
+### Running Tests
+
+To run the unit tests:
+```bash
+# Install test dependencies
+pip install pytest pytest-mock
+
+# Run tests from project root
+pytest
+```
+
 ### Troubleshooting
 
 #### Common Issues

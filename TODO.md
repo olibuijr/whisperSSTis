@@ -20,10 +20,11 @@
 - [ ] Create user manual with screenshots
 
 ## Testing
-- [ ] Create automated tests
+- [x] Create automated tests (initial setup)
 - [ ] Test on different hardware configurations
 - [ ] Test with different microphones
 - [ ] Test with various audio file formats
+- [ ] Add more comprehensive tests for core functions
 
 ## Distribution
 - [ ] Set up automatic builds
